@@ -45,6 +45,7 @@ function initialize() {
         } else if(answer.MainMenu === "View All Roles") {
             viewAllRoles();
         } else {
+            console.log("Goodbye!");
             connection.end();
         };
     });
