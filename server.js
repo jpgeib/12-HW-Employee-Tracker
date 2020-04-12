@@ -178,10 +178,61 @@ function updateEmployeeRole() {
             message: "Which employee's information would you like to update?"
         },
         {
-            name: "employeeInfo",
-            type: "list",
-            message: "Which information would you like to update?",
-            choices: ["First Name", "Last Name", "Role ID", "Manager ID"]
+            name: "newRoleID",
+            type: "input",
+            message: "What is this employee's new role ID?"
         }
-    ])
-}
+    ]).then(function(answer) {
+        connection.query(
+            "UPDATE employee SET ?",
+            {
+                role_id: answer.newRoleID
+            },
+            function(err) {
+                if (err) throw err;
+                console.log("Employee's role updated!");
+                initialize();
+            }
+        );
+    });
+};
+
+//Update employee's manager
+
+function updateEmployeeManager() {
+    inquirer.prompt([
+        {
+            name: "employeeToUpdate",
+            type: "input",
+            message: "Which employee's information would you like to update?"
+        },
+        {
+            name: "newManager",
+            type: "input",
+            message: "What is the new manager's ID?"
+        }
+    ]).then(function(answer) {
+        connection.query(
+            "UPDATE employee SET ?",
+            {
+                manager_id: answer.newManager
+            },
+            function(err) {
+                if (err) throw err;
+                console.log("Employee's manager updated!");
+                initialize();
+            }
+        );
+    });
+};
+
+//View all roles
+
+function viewAllEmployees() {
+    connection.query("SELECT * FROM role", function(err, res) {
+        for(var i = 0; i < res.length; i++) {
+            console.log(res[i].id + " | " + res[i].title + " | " + res[i].salary + " | " + res[i].department_id);
+        }
+        console.log("--------------------------------------");
+    });
+};
