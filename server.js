@@ -66,9 +66,10 @@ function viewAllEmployees() {
 //View Employees by Department
 
 function employeesByDept() {
-    connection.query("SELECT first_name, last_name FROM employee INNER JOIN department ON employee.first_name = department.name", function(err, res) {
+    connection.query("SELECT first_name, last_name, role.title, department.name FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id", function(err, res) {
+        console.log(res);
         for(var i = 0; i < res.length; i++) {
-            console.log(res[i].employee.first_name + " | " + res[i].employee.last_name + " | " + res[i].department.name);
+            console.log(res[i].first_name + " | " + res[i].last_name + " | " + res[i].name + " | " + res[i].title);
         }
         console.log("--------------------------------------");
     });
@@ -115,8 +116,8 @@ function addEmployee() {
             {
                 first_name: answer.firstname,
                 last_name: answer.lastname,
-                role_id: role_id,
-                manager_id: manager_id
+                role_id: answer.role_id,
+                manager_id: answer.manager_id
             },
             function(err) {
                 if (err) throw err;
@@ -152,14 +153,14 @@ function removeEmployee() {
             message: "What is the ID of this employee's manager?"
         }
     ]).then(function(answer) {
-        connection.query(
-            "DELETE FROM employee WHERE ?",
-            {
-                first_name: answer.firstname,
-                last_name: answer.lastname,
-                role_id: role_id,
-                manager_id: manager_id
-            },
+       connection.query(
+            "DELETE FROM employee WHERE ? AND ? AND ? AND ?",
+            [{
+                first_name: answer.firstname},
+                {last_name: answer.lastname},
+                {role_id: answer.role_id},
+                {manager_id: answer.manager_id
+            }],
             function(err) {
                 if (err) throw err;
                 console.log("Employee deleted, enjoy the rest of your pitiful life!");
@@ -174,9 +175,9 @@ function removeEmployee() {
 function updateEmployeeRole() {
     inquirer.prompt([
         {
-            name: "employeeToUpdate",
+            name: "employeeID",
             type: "input",
-            message: "Which employee's information would you like to update?"
+            message: "What is the employee's id?"
         },
         {
             name: "newRoleID",
@@ -185,10 +186,13 @@ function updateEmployeeRole() {
         }
     ]).then(function(answer) {
         connection.query(
-            "UPDATE employee SET ?",
-            {
+            "UPDATE employee SET ? WHERE ?",
+            [{
                 role_id: answer.newRoleID
             },
+            {
+               id: answer.employeeID
+            }],
             function(err) {
                 if (err) throw err;
                 console.log("Employee's role updated!");
@@ -229,7 +233,7 @@ function updateEmployeeManager() {
 
 //View all roles
 
-function viewAllEmployees() {
+function viewAllRoles() {
     connection.query("SELECT * FROM role", function(err, res) {
         for(var i = 0; i < res.length; i++) {
             console.log(res[i].id + " | " + res[i].title + " | " + res[i].salary + " | " + res[i].department_id);
