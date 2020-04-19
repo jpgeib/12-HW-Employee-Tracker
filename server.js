@@ -11,7 +11,7 @@ const connection = mysql.createConnection({
     // insecureAuth: true
 });
 
-connection.connect(function(err) {
+connection.connect(function (err) {
     if (err) throw err;
     console.log("Connected as id " + connection.threadId + "\n");
     initialize();
@@ -27,23 +27,23 @@ function initialize() {
         type: "list",
         message: "What would you like to do?",
         choices: ["View All Employees", "View All Employees by Department", "View All Employees by Manager",
-    "Add Employee", "Remove Employee", "Update Employee Role", "Update Employee Manager", "View All Roles"]
-    }).then(function(answer) {
+            "Add Employee", "Remove Employee", "Update Employee Role", "Update Employee Manager", "View All Roles"]
+    }).then(function (answer) {
         if (answer.MainMenu === "View All Employees") {
             viewAllEmployees();
-        } else if(answer.MainMenu === "View All Employees by Department") {
+        } else if (answer.MainMenu === "View All Employees by Department") {
             employeesByDept();
-        } else if(answer.MainMenu === "View All Employees by Manager") {
+        } else if (answer.MainMenu === "View All Employees by Manager") {
             employeesByManager();
-        } else if(answer.MainMenu === "Add Employee") {
+        } else if (answer.MainMenu === "Add Employee") {
             addEmployee();
-        } else if(answer.MainMenu === "Remove Employee") {
+        } else if (answer.MainMenu === "Remove Employee") {
             removeEmployee();
-        } else if(answer.MainMenu === "Update Employee Role") {
+        } else if (answer.MainMenu === "Update Employee Role") {
             updateEmployeeRole();
-        } else if(answer.MainMenu === "Update Employee Manager") {
+        } else if (answer.MainMenu === "Update Employee Manager") {
             updateEmployeeManager();
-        } else if(answer.MainMenu === "View All Roles") {
+        } else if (answer.MainMenu === "View All Roles") {
             viewAllRoles();
         } else {
             console.log("Goodbye!");
@@ -55,34 +55,37 @@ function initialize() {
 //View All Employees function
 
 function viewAllEmployees() {
-    connection.query("SELECT * FROM employee", function(err, res) {
-        for(var i = 0; i < res.length; i++) {
+    connection.query("SELECT * FROM employee", function (err, res) {
+        for (var i = 0; i < res.length; i++) {
             console.log(res[i].id + " | " + res[i].first_name + " | " + res[i].last_name + " | " + res[i].role_id + " | " + res[i].manager_id);
         }
         console.log("--------------------------------------");
+        initialize();
     });
 };
 
 //View Employees by Department
 
 function employeesByDept() {
-    connection.query("SELECT first_name, last_name, role.title, department.name FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id", function(err, res) {
+    connection.query("SELECT first_name, last_name, role.title, department.name FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id", function (err, res) {
         console.log(res);
-        for(var i = 0; i < res.length; i++) {
+        for (var i = 0; i < res.length; i++) {
             console.log(res[i].first_name + " | " + res[i].last_name + " | " + res[i].name + " | " + res[i].title);
         }
         console.log("--------------------------------------");
+        initialize();
     });
 };
 
 //View Employees by Manager
 
 function employeesByManager() {
-    connection.query("SELECT first_name, last_name, manager_id FROM employee", function(err, res) {
-        for(var i = 0; i < res.length; i++) {
-            console.log(res[i].employee.first_name + " | " + res[i].employee.last_name + " | " + res[i].manager_id);
+    connection.query("SELECT first_name, last_name, manager_id FROM employee", function (err, res) {
+        for (var i = 0; i < res.length; i++) {
+            console.log(res[i].first_name + " | " + res[i].last_name + " | " + res[i].manager_id);
         }
         console.log("--------------------------------------");
+        initialize();
     });
 };
 
@@ -110,7 +113,7 @@ function addEmployee() {
             type: "input",
             message: "What is the ID of this employee's manager?"
         }
-    ]).then(function(answer) {
+    ]).then(function (answer) {
         connection.query(
             "INSERT INTO employee SET ?",
             {
@@ -119,7 +122,7 @@ function addEmployee() {
                 role_id: answer.role_id,
                 manager_id: answer.manager_id
             },
-            function(err) {
+            function (err) {
                 if (err) throw err;
                 console.log("Employee added, enjoy corporate America for the rest of your pitiful life!");
                 initialize();
@@ -152,16 +155,18 @@ function removeEmployee() {
             type: "input",
             message: "What is the ID of this employee's manager?"
         }
-    ]).then(function(answer) {
-       connection.query(
+    ]).then(function (answer) {
+        connection.query(
             "DELETE FROM employee WHERE ? AND ? AND ? AND ?",
             [{
-                first_name: answer.firstname},
-                {last_name: answer.lastname},
-                {role_id: answer.role_id},
-                {manager_id: answer.manager_id
+                first_name: answer.firstname
+            },
+            { last_name: answer.lastname },
+            { role_id: answer.role_id },
+            {
+                manager_id: answer.manager_id
             }],
-            function(err) {
+            function (err) {
                 if (err) throw err;
                 console.log("Employee deleted, enjoy the rest of your pitiful life!");
                 initialize();
@@ -184,16 +189,16 @@ function updateEmployeeRole() {
             type: "input",
             message: "What is this employee's new role ID?"
         }
-    ]).then(function(answer) {
+    ]).then(function (answer) {
         connection.query(
             "UPDATE employee SET ? WHERE ?",
             [{
                 role_id: answer.newRoleID
             },
             {
-               id: answer.employeeID
+                id: answer.employeeID
             }],
-            function(err) {
+            function (err) {
                 if (err) throw err;
                 console.log("Employee's role updated!");
                 initialize();
@@ -209,20 +214,23 @@ function updateEmployeeManager() {
         {
             name: "employeeToUpdate",
             type: "input",
-            message: "Which employee's information would you like to update?"
+            message: "What is the employee's ID?"
         },
         {
             name: "newManager",
             type: "input",
             message: "What is the new manager's ID?"
         }
-    ]).then(function(answer) {
+    ]).then(function (answer) {
         connection.query(
-            "UPDATE employee SET ?",
-            {
+            "UPDATE employee SET ? WHERE ?",
+            [{
                 manager_id: answer.newManager
             },
-            function(err) {
+            {
+                id: answer.employeeToUpdate
+            }],
+            function (err) {
                 if (err) throw err;
                 console.log("Employee's manager updated!");
                 initialize();
@@ -234,10 +242,11 @@ function updateEmployeeManager() {
 //View all roles
 
 function viewAllRoles() {
-    connection.query("SELECT * FROM role", function(err, res) {
-        for(var i = 0; i < res.length; i++) {
+    connection.query("SELECT * FROM role", function (err, res) {
+        for (var i = 0; i < res.length; i++) {
             console.log(res[i].id + " | " + res[i].title + " | " + res[i].salary + " | " + res[i].department_id);
         }
         console.log("--------------------------------------");
+        initialize();
     });
 };
