@@ -68,7 +68,6 @@ function viewAllEmployees() {
 
 function employeesByDept() {
     connection.query("SELECT first_name, last_name, role.title, department.name FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department ON role.department_id = department.id", function (err, res) {
-        console.log(res);
         for (var i = 0; i < res.length; i++) {
             console.log(res[i].first_name + " | " + res[i].last_name + " | " + res[i].name + " | " + res[i].title);
         }
