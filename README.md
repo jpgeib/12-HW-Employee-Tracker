@@ -45,13 +45,7 @@ npm i mysql
 npm i inquire
 ```
 
-Then, once everything is installed, in the root folder, enter"
-
-```
-nodemon server.js
-```
-
-Alternatively, if you do not have nodemon, you can use:
+Then, once everything is installed, in the root folder, enter:
 
 ```
 node server.js
