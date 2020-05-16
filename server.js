@@ -27,27 +27,32 @@ function initialize() {
         type: "list",
         message: "What would you like to do?",
         choices: ["View All Employees", "View All Employees by Department", "View All Employees by Manager",
-            "Add Employee", "Remove Employee", "Update Employee Role", "Update Employee Manager", "View All Roles"]
+            "Add Employee", "Remove Employee", "Update Employee Role", "Update Employee Manager", "View All Roles", "Add Role"]
     }).then(function (answer) {
-        if (answer.MainMenu === "View All Employees") {
-            viewAllEmployees();
-        } else if (answer.MainMenu === "View All Employees by Department") {
-            employeesByDept();
-        } else if (answer.MainMenu === "View All Employees by Manager") {
-            employeesByManager();
-        } else if (answer.MainMenu === "Add Employee") {
-            addEmployee();
-        } else if (answer.MainMenu === "Remove Employee") {
-            removeEmployee();
-        } else if (answer.MainMenu === "Update Employee Role") {
-            updateEmployeeRole();
-        } else if (answer.MainMenu === "Update Employee Manager") {
-            updateEmployeeManager();
-        } else if (answer.MainMenu === "View All Roles") {
-            viewAllRoles();
-        } else {
-            console.log("Goodbye!");
-            connection.end();
+        switch (answer.MainMenu) {
+            case "View All Employees":
+                return viewAllEmployees();
+            case "View All Employees by Department":
+                return employeesByDept();
+            case "View All Employees by Manager":
+                return employeesByManager();
+            case "Add Employee":
+                return addEmployee();
+            case "Remove Employee":
+                return removeEmployee();
+            case "Update Employee Role":
+                return updateEmployeeRole();
+            case "Update Employee Manager":
+                return updateEmployeeManager();
+            case "View All Roles":
+                return viewAllRoles();
+            case "Add Role":
+                return addRole();
+            default:
+                console.log("Goodbye!");
+                connection.end();
+                process.exit();
+                return;
         };
     });
 };
@@ -59,7 +64,7 @@ function viewAllEmployees() {
         for (var i = 0; i < res.length; i++) {
             console.log(res[i].id + " | " + res[i].first_name + " | " + res[i].last_name + " | " + res[i].role_id + " | " + res[i].manager_id);
         }
-        console.log("--------------------------------------");
+        console.log("\n--------------------------------------");
         initialize();
     });
 };
@@ -249,3 +254,39 @@ function viewAllRoles() {
         initialize();
     });
 };
+
+//Add role
+
+function addRole() {
+    inquirer.prompt([
+        {
+            name: "roleTitle",
+            type: "input",
+            message: "What role would you like to add?"
+        },
+        {
+            name: "salary",
+            type: "input",
+            message: "What is this role's salary?"
+        },
+        {
+            name: "department_id",
+            type: "input",
+            message: "What department does this role belong to?"
+        }
+    ]).then(function (answer) {
+        connection.query(
+            "INSERT INTO role SET ?",
+            {
+                title: answer.roleTitle,
+                salary: answer.salary,
+                department_id: answer.department_id
+            },
+            function (err) {
+                if (err) throw err;
+                console.log("Role added, enjoy a new way for corporate America to slice the soul from your being!");
+                initialize();
+            }
+        );
+    });
+}
